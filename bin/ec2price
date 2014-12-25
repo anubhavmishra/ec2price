@@ -1,0 +1,120 @@
+# Copyright [2014] [Anubhav Mishra] <anubhavmishra@me.com>
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+#
+#	ec2-price - AWS EC2 Pricing Tool.
+#	
+#	Author: Anubhav Mishra
+#
+
+import argparse
+import urllib2
+import json
+
+# Define colours for cli outputs
+HEADER = '\033[95m'
+OKBLUE = '\033[94m'
+OKGREEN = '\033[92m'
+WARNING = '\033[93m'
+FAIL = '\033[91m'
+ENDC = '\033[0m'
+
+def getPricing():
+	try:
+		price_data = urllib2.urlopen("https://a0.awsstatic.com/pricing/1/deprecated/ec2/linux-od.json").read()
+	
+	except urllib2.HTTPError, e:
+    		print HEADER + 'Error:' + ENDC
+    		print e
+    		print ''
+	    	return None
+	except urllib2.URLError, e:
+	    	print HEADER + 'Error:' + ENDC
+    		print e
+    		print ''
+	    	return None
+	except httplib.HTTPException, e:
+	    	print HEADER + 'Error:' + ENDC
+	    	print e
+	    	print ''
+	    	return None
+	else:
+		data = json.loads(price_data) 
+		return data
+
+
+def getAvailableRegions(data):
+	regions = []
+	for k in data['config']['regions']:
+		regions.append(k['region'])
+	return regions
+
+
+def getPriceForRegion(region, data):
+	# Convert region list into string
+	region = ''.join(region)
+	print WARNING + 'Region: ' + region + ENDC
+	print '======================================================'
+	print HEADER + 'Type' + '	                 ' + 'OS' + '	  ' + 'Price (USD/hour)' + ENDC
+	print '======================================================'
+	print ''	
+
+	for k in data['config']['regions']:
+		if k['region'] == region:
+			instancesTypes = k['instanceTypes']
+			for types in instancesTypes:
+				for obj in types['sizes']:
+					instance_size = obj['size']
+					for values in obj['valueColumns']:
+						instance_os = values['name']
+						instance_price = values['prices']['USD']
+					print instance_size + '	         ' + instance_os + '	  ' + instance_price
+		else:
+			continue
+	return
+
+
+def main():
+	parser = argparse.ArgumentParser(description='Tool for getting pricing for EC2 Instances.')
+	parser.add_argument('--region', type=str, nargs='+',
+                   help='AWS Region for the EC2 Instance. eg: us-east-1, us-west-1.')
+	args = parser.parse_args()
+
+	if args.region == None:
+		print FAIL + "Please specify a region!. eg: ec2-price.py --region REGION NAME" + ENDC
+		print '---------------------------------------------------------------------'
+		print OKBLUE + "Available Regions:" + ENDC
+		print '====================================================================='
+		pricing_data = getPricing()
+		if pricing_data != None:
+			regions = getAvailableRegions(pricing_data)
+			region_str = ""
+			for region in regions:
+				print region
+			print ''
+		else:
+			return
+
+	else:
+		pricing_data = getPricing()
+		if pricing_data != None:
+			getPriceForRegion(args.region, pricing_data)
+			print ''
+		else:
+			return
+
+if __name__ == '__main__':
+	main()
+
