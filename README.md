@@ -47,7 +47,7 @@ m1.large	         linux	  0.175
 
 ```ec2price -h```
 ```
-usage: ec2pr.py [-h] [--region REGION] [--type TYPE] [--old]
+usage: ec2price [-h] [--region REGION] [--type TYPE] [--old]
 
 Tool for getting pricing for EC2 Instances.
 
@@ -61,7 +61,7 @@ optional arguments:
 
 ```ec2price --help```
 ```
-usage: ec2pr.py [-h] [--region REGION] [--type TYPE] [--old]
+usage: ec2price [-h] [--region REGION] [--type TYPE] [--old]
 
 Tool for getting pricing for EC2 Instances.
 
