@@ -70,6 +70,9 @@ def getPriceForRegion(region, data, ec2type):
 	else:
 		ec2type = None
 
+	# Count the number of results
+	results = 0
+
 	print WARNING + 'Region: ' + region + ENDC
 	print '======================================================'
 	print HEADER + 'Type' + '	                 ' + 'OS' + '	  ' + 'Price (USD/hour)' + ENDC
@@ -88,12 +91,14 @@ def getPriceForRegion(region, data, ec2type):
 						if ec2type != None:
 							if ec2type == instance_size:
 								print instance_size + '	         ' + instance_os + '	  ' + instance_price
+								results = results + 1
 								break
 						else:
+							results = results + 1
 							print instance_size + '	         ' + instance_os + '	  ' + instance_price
 		else:
 			continue
-	return
+	return results
 
 
 def main():
@@ -106,7 +111,7 @@ def main():
                    help='Specify \'--old\' for previous generation instances price search.')
 	args = parser.parse_args()
 
-	if args.old != None:
+	if args.old:
 		url = "https://a0.awsstatic.com/pricing/1/deprecated/ec2/previous-generation/linux-od.json"
 	else:
 		url = "https://a0.awsstatic.com/pricing/1/deprecated/ec2/linux-od.json"
@@ -129,8 +134,12 @@ def main():
 	else:
 		pricing_data = getPricing(url)
 		if pricing_data != None:
-			getPriceForRegion(args.region, pricing_data, args.type)
-			print ''
+			results = getPriceForRegion(args.region, pricing_data, args.type)
+			if results == 0:
+				print WARNING + 'Sorry! No results found!' + ENDC
+				print 'Try \'--old\' previous generation EC2 instances.'
+			else:
+				print ''
 		else:
 			return
 
