@@ -117,7 +117,7 @@ def main():
 		url = "https://a0.awsstatic.com/pricing/1/deprecated/ec2/linux-od.json"
 
 	if args.region == None:
-		print FAIL + "Please specify a region!. eg: ec2-price.py --region REGION NAME" + ENDC
+		print FAIL + "Please specify a region!. eg: ec2price --region REGION NAME" + ENDC
 		print '---------------------------------------------------------------------'
 		print OKBLUE + "Available Regions:" + ENDC
 		print '====================================================================='
