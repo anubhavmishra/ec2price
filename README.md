@@ -24,7 +24,6 @@ m1.medium	         linux	0.120
 ```ec2price --region us-east-1 --type m3.xlarge```
 ```
 
-```
 Region: us-east-1
 ======================================================
 Type	                 OS	  Price (USD/hour)
@@ -37,7 +36,6 @@ m3.xlarge	         linux	  0.280
 ```ec2price --region us-east-1 --type m1.large --old```
 ```
 
-```
 Region: us-east-1
 ======================================================
 Type	                 OS	  Price (USD/hour)
@@ -74,6 +72,7 @@ optional arguments:
   --old            Specify '--old' for previous generation instances price
                    search.
 ```
+
 ```ec2price ```
 ```
 Please specify a region!. eg: ec2-price.py --region REGION NAME
