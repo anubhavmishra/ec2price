@@ -31,9 +31,9 @@ WARNING = '\033[93m'
 FAIL = '\033[91m'
 ENDC = '\033[0m'
 
-def getPricing():
+def getPricing(url):
 	try:
-		price_data = urllib2.urlopen("https://a0.awsstatic.com/pricing/1/deprecated/ec2/linux-od.json").read()
+		price_data = urllib2.urlopen(url).read()
 	
 	except urllib2.HTTPError, e:
     		print HEADER + 'Error:' + ENDC
@@ -62,9 +62,14 @@ def getAvailableRegions(data):
 	return regions
 
 
-def getPriceForRegion(region, data):
-	# Convert region list into string
+def getPriceForRegion(region, data, ec2type):
+	# Convert region and type list into string
 	region = ''.join(region)
+	if ec2type != None:
+		ec2type = ''.join(ec2type)
+	else:
+		ec2type = None
+
 	print WARNING + 'Region: ' + region + ENDC
 	print '======================================================'
 	print HEADER + 'Type' + '	                 ' + 'OS' + '	  ' + 'Price (USD/hour)' + ENDC
@@ -80,7 +85,12 @@ def getPriceForRegion(region, data):
 					for values in obj['valueColumns']:
 						instance_os = values['name']
 						instance_price = values['prices']['USD']
-					print instance_size + '	         ' + instance_os + '	  ' + instance_price
+						if ec2type != None:
+							if ec2type == instance_size:
+								print instance_size + '	         ' + instance_os + '	  ' + instance_price
+								break
+						else:
+							print instance_size + '	         ' + instance_os + '	  ' + instance_price
 		else:
 			continue
 	return
@@ -88,16 +98,25 @@ def getPriceForRegion(region, data):
 
 def main():
 	parser = argparse.ArgumentParser(description='Tool for getting pricing for EC2 Instances.')
-	parser.add_argument('--region', type=str, nargs='+',
+	parser.add_argument('--region', type=str,
                    help='AWS Region for the EC2 Instance. eg: us-east-1, us-west-1.')
+	parser.add_argument('--type', type=str,
+                   help='The type of EC2 Instance. eg: m3.medium, m2.2xlarge.')
+	parser.add_argument('--old', action='store_true',
+                   help='Specify \'--old\' for previous generation instances price search.')
 	args = parser.parse_args()
+
+	if args.old != None:
+		url = "https://a0.awsstatic.com/pricing/1/deprecated/ec2/previous-generation/linux-od.json"
+	else:
+		url = "https://a0.awsstatic.com/pricing/1/deprecated/ec2/linux-od.json"
 
 	if args.region == None:
 		print FAIL + "Please specify a region!. eg: ec2-price.py --region REGION NAME" + ENDC
 		print '---------------------------------------------------------------------'
 		print OKBLUE + "Available Regions:" + ENDC
 		print '====================================================================='
-		pricing_data = getPricing()
+		pricing_data = getPricing(url)
 		if pricing_data != None:
 			regions = getAvailableRegions(pricing_data)
 			region_str = ""
@@ -108,9 +127,9 @@ def main():
 			return
 
 	else:
-		pricing_data = getPricing()
+		pricing_data = getPricing(url)
 		if pricing_data != None:
-			getPriceForRegion(args.region, pricing_data)
+			getPriceForRegion(args.region, pricing_data, args.type)
 			print ''
 		else:
 			return
